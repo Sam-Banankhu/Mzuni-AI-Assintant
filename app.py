@@ -1,3 +1,12 @@
 import streamlit as st
 
-st.title("Hello World")
+def main():
+    st.set_page_config(page_title="Mzuni AI Assistant", page_icon=":books:")
+    st.header("Mzuni AI Assistant :books:")
+    st.text_input("Ask me what you want to know about Mzuzu University")
+    
+    
+    
+
+if __name__ == "__main__":
+    main()
