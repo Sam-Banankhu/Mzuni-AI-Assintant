@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 from PyPDF2 import PdfReader
 import re
 from langchain.text_splitter import CharacterTextSplitter
+from langchain_openai import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
 # from file_processing.file_preprocessing import *
 
 
@@ -43,9 +45,17 @@ def get_text_chunks(text):
         chunk_overlap=200,
         length_function=len
     )
-    chunks = textsplitter.split_text(text=text)
+    chunks = textsplitter.split_text(text)
     
     return chunks
+
+def create_vectors_store(text_chunks):
+    embeddings = OpenAIEmbeddings()  # Assuming OpenAIEmbeddings is a class or function that generates embeddings
+    # index = FAISS()  # Assuming FAISS is a class or function that creates a FAISS index
+    
+    vector_store = FAISS.from_texts(text_chunks, embeddings)
+        
+    return vector_store
 
 def main():
     load_dotenv()
@@ -64,8 +74,9 @@ def main():
                     # st.write(raw_text)
                     # get chunks of pdf files
                     text_chunks = get_text_chunks(raw_text)
-                    st.write(text_chunks)
+                    # st.write(text_chunks)text_chunks, vectorstext_chunks, vectorsxt_chunks, vectors
                     # create vectors store
+                    vectors = create_vectors_store(text_chunks=text_chunks)
                 except Exception as e:
                     st.error(e)
         
