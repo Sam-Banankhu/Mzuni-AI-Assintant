@@ -8,6 +8,7 @@ from langchain_openai.chat_models import ChatOpenAI
 from langchain_community.vectorstores import FAISS
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
+from htmlTemplates import css, bot_template, user_template
 
 
 def get_pdf_text(pdf_docs):
@@ -53,23 +54,36 @@ def create_vectors_store(text_chunks):
 
 def get_conversation_chains(vectors_db):
     llm = ChatOpenAI()
+     # Creating the retriever configuration dictionary
+    retriever_config = {
+        "name": "FAISS",
+        "vector_store": vectors_db
+    }
     memory = ConversationBufferMemory(memory_key='chat_history',return_messages=True)
     conversation_chain = ConversationalRetrievalChain.from_llm(
-        llm=llm, memory=memory, retriever= vectors_db
+        llm=llm, memory=memory, retriever= retriever_config
     )
     return conversation_chain
 
+def handle_userInput(user_question):
+    response = st.session_state.conversation({'question': user_question})
+    st.write(response)
 
 def main():
     load_dotenv()
     st.set_page_config(page_title="Mzuni AI Assistant", page_icon=":books:")
+    st.write(css, unsafe_allow_html=True)
     
     if "conversation" not in st.session_state:
         st.session_state["conversation"] = None
         
     st.header("Mzuni AI Assistant :books:")
-    st.text_input("Ask me what you want to know about Mzuzu University")
+    user_question = st.text_input("Ask me what you want to know about Mzuzu University")
+    if user_question:
+        handle_userInput(user_question)
     
+    st.write(user_template.replace("{{MSG}}", "Hello Chat:"), unsafe_allow_html=True)
+    st.write(bot_template.replace("{{MSG}}", "Hello User:"), unsafe_allow_html=True)
     with st.sidebar:
         st.subheader("Your Documents")
         pdf_docs = st.file_uploader("Please upload your documents here", accept_multiple_files=True)
