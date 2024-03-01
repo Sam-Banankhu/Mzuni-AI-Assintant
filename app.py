@@ -53,7 +53,7 @@ def create_vectors_store(text_chunks):
     return vector_store
 
 def get_conversation_chains(vectors_db):
-    llm = ChatOpenAI()
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0)
      # Creating the retriever configuration dictionary
     retriever_config = {
         "name": "FAISS",
@@ -61,7 +61,7 @@ def get_conversation_chains(vectors_db):
     }
     memory = ConversationBufferMemory(memory_key='chat_history',return_messages=True)
     conversation_chain = ConversationalRetrievalChain.from_llm(
-        llm=llm, memory=memory, retriever= retriever_config
+        llm=llm, memory=memory, retriever= vectors_db.as_retriever()
     )
     return conversation_chain
 
@@ -76,6 +76,7 @@ def main():
     
     if "conversation" not in st.session_state:
         st.session_state["conversation"] = None
+        # pass
         
     st.header("Mzuni AI Assistant :books:")
     user_question = st.text_input("Ask me what you want to know about Mzuzu University")
@@ -99,6 +100,9 @@ def main():
                     # create vectors store
                     vector_db = create_vectors_store(text_chunks=text_chunks)
                     
+                    # query = "What are the gaps in Malawi National Sanitation Policy 2008?"
+                    # docs = vector_db.similarity_search(query)
+                    # st.write(docs[0].page_content)
                     st.session_state.conversation = get_conversation_chains(vector_db)
     
                 except Exception as e:
